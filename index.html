@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      #map {
+        max-height: 100%;
+        min-height: 90%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Verdana;
+      }
+      .infos {
+        color: #004085;
+      }
+      p {
+        margin: 0;
+        padding: .25rem .5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="infos">
+      <p>O mapa cria uma área aproximada com os casos confirmados. Quanto mais casos numa área, maior o círculo.</p>
+
+      <p>Permita a localização para saber se você está próximo das áreas de foco do vírus.</p>
+
+      <p>Desenvolvidoo por: <a href="https://conecti.me">Willian Mano</a></p>
+    </div>
+    <div id="map"></div>
+    <script>
+      var map, infoWindow;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: {lat: -2.5341152, lng: -44.276962},
+          mapTypeId: 'terrain'
+        });
+
+        var script = document.createElement('script');
+
+        script.src = './data.js';
+        document.getElementsByTagName('head')[0].appendChild(script);
+
+        map.data.setStyle(function(feature) {
+          var qtd = feature.getProperty('quantity');
+          return {
+            icon: getCircle(qtd)
+          };
+        });
+
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            map.setCenter(pos);
+            map.setZoom(16);
+
+            var marker = new google.maps.Marker({position: pos, map: map});
+          });
+        }
+      }
+
+      function getCircle(qtd) {
+        return {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: 'red',
+          fillOpacity: .2,
+          scale: Math.pow(2, qtd) / 2,
+          strokeColor: 'white',
+          strokeWeight: .5
+        };
+      }
+
+      function eqfeed_callback(results) {
+        map.data.addGeoJson(results);
+      }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAX99UWvdYjWtgRE1T1yvITyEA3_3qA6cA&callback=initMap">
+    </script>
+  </body>
+</html>
